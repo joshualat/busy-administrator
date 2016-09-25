@@ -179,13 +179,8 @@ Memory Utils with Analyzer (memory size of specific objects)
 ~~~ ruby
 require 'busy-administrator'
 
-class ExampleA
+class Example
   attr_accessor :large_value
-end
-
-class ExampleB
-  attr_accessor :large_value
-  attr_accessor :linked_example
 end
 
 testing_a = Example.new

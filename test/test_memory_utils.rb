@@ -5,8 +5,6 @@ class Example
   attr_accessor :large_value
 end
 
-# TODO: Fix implementation of generate string with specified memory size
-
 class BusyAdministratorMemoryUtilsTest < Minitest::Test
   def setup
     GC.start
