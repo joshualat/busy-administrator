@@ -11,6 +11,7 @@ Handy Ruby Dev Tools for the Busy Administrator
 - friendly display helper
 - friendly memory size wrapper
 - example generator to test memory size of objects
+- friendly Rails memory middleware with object memory size analyzer
 
 ## Requirements
 
@@ -92,6 +93,122 @@ BusyAdministrator::Display.debug(results)
             RubyVM::Env: 96 Bytes
             Time: 176 Bytes
             Enumerator: 80 Bytes
+        }
+}
+~~~
+
+Basic usage (Middleware)
+------------------------
+
+### Gemfile
+
+~~~ ruby
+...
+
+gem 'busy-administrator', '~> 1.1.0'
+
+...
+~~~
+
+### /config/application.rb
+
+~~~ ruby
+module RailsApp
+  class Application < Rails::Application
+    ...
+
+    config.middleware.use BusyAdministrator::MemoryMiddleware
+
+    ...
+  end
+end
+~~~
+
+### /app/controllers/application_controller.rb
+
+~~~ ruby
+class ApplicationController < ActionController::Base
+  ...
+
+  include BusyAdministrator::MemoryMiddleware::Analyzer
+
+  ...
+end
+~~~
+
+### /app/controllers/example_controller.rb
+
+~~~ ruby
+class ExampleController < ApplicationController
+  ...
+
+  def example
+    @large_object = BusyAdministrator::ExampleGenerator.generate_string_with_specified_memory_size(5.mebibytes)
+
+    analyze(key: '@large_object', value: @large_object)
+  end
+
+  ...
+end
+~~~
+
+### Run Server
+
+Make sure you set the environment variables to enable the profiler
+
+~~~ bash
+BUSY_ADMINISTRATOR_PROFILE=YES bundle exec rails server
+~~~
+
+or
+
+~~~ bash
+BUSY_ADMINISTRATOR_PROFILE=YES BUSY_ADMINISTRATOR_GC_ENABLED=YES bundle exec rails server
+~~~
+
+to enable GC
+
+### Output (GC Disabled)
+~~~ ruby
+{
+    memory_usage:
+        {
+            before: 72 MiB
+            after: 78 MiB
+            diff: 5 MiB
+        }
+    total_time: 0.218182
+    gc:
+        {
+            count: 0
+            enabled: false
+        }
+    specific:
+        {
+            @large_object: 5 MiB
+        }
+    object_count: 4903
+    general:
+        {
+            String: 5 MiB
+            Array: 3 MiB
+            Thread::Backtrace: 8 KiB
+            LoadError: 48 Bytes
+            Regexp: 26 KiB
+            MatchData: 9 KiB
+            Proc: 7 KiB
+            RubyVM::Env: 9 KiB
+            Module: 4 KiB
+            ActionController::ParamsWrapper::Options: 480 Bytes
+            Class: 11 KiB
+            Mutex: 408 Bytes
+
+            ...
+
+            ActionView::TemplateRenderer: 0 Bytes
+            ObjectSpace::InternalObjectWrapper: 672 Bytes
+            Rack::BodyProxy: 0 Bytes
+            ActionView::Template::Text: 0 Bytes
         }
 }
 ~~~

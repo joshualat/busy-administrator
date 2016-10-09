@@ -6,6 +6,7 @@ require 'busy-administrator/memory_size'
 require 'busy-administrator/memory_utils'
 require 'busy-administrator/process_utils'
 require 'busy-administrator/version'
+require 'busy-administrator/memory_middleware'
 
 """
 require 'busy-administrator'

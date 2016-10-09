@@ -9,7 +9,8 @@ included_files = [
   'memory_size',
   'memory_utils',
   'process_utils',
-  'version'
+  'version',
+  'memory_middleware'
 ].map { |filename| "lib/busy-administrator/#{ filename }.rb" }
 
 included_files << 'lib/busy-administrator.rb'

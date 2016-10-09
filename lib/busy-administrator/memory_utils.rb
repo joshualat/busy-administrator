@@ -82,7 +82,7 @@ module BusyAdministrator
           excluded_object_id_storage = get_created_object_ids
           log("[Before] Object Count: #{ excluded_object_id_storage.size }", verbose: verbose)          
         end
-        
+
         action("Get Memory Usage Before Execution") do
           memory_usage_before = ProcessUtils.get_memory_usage(:rss)
           output_container[:memory_usage][:before] = memory_usage_before
@@ -147,11 +147,12 @@ module BusyAdministrator
           general = {}
 
           all_object_ids_after_execution.each do |object_id|
-            target = ObjectSpace._id2ref(object_id)
-            target_class = target.class.name
+            target = ObjectSpace._id2ref(object_id) rescue nil
 
-            general[target_class.to_sym] ||= 0
-            general[target_class.to_sym] += ObjectSpace.memsize_of(target)
+            if target_class = target.class.name rescue nil
+              general[target_class.to_sym] ||= 0
+              general[target_class.to_sym] += ObjectSpace.memsize_of(target)
+            end
           end
 
           general.each do |key, value|
